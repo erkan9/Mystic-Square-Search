@@ -20,17 +20,28 @@ public class Timer {
      */
     public void drawTimer(Graphics g) {
 
+        timerAppearance(g);
+
+        timerSecondsVisualiser(g);
+    }
+
+
+    /**
+     * Method that sets appearance of the counter box
+     *
+     * @param g Object of Graphics
+     */
+    private void timerAppearance(Graphics g) {
+
         g.setColor(Color.ORANGE);
         g.fillRect(TIME_X, TIME_Y, 124, 60);
 
         g.setColor(Color.BLACK);
         g.setFont(timerFont);
-
-        timerSecondsVisualiser(g);
     }
 
     /**
-     * Method that visualises the seconds in the "windowheader.Timer Box"
+     * Method that visualises the seconds in the "Timer Box"
      *
      * @param g Object of Graphics
      */

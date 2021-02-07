@@ -8,13 +8,23 @@ import java.awt.event.MouseMotionListener;
 import java.util.*;
 import java.awt.*;
 
+//TODO make the logic about movement and end of game
+
 public class GUI extends JFrame {
 
-    public final byte NUMBER_OF_COWS_AND_ROWS = 8;
+    private final byte NUMBER_OF_COWS_AND_ROWS = 8;
 
-    final byte spacing = 2;
-    final byte boxWidth = 72;
-    final byte boxHeight = 65;
+    boolean isBoxPlaced = false;
+    public int lastClickedColumn = 16;
+    int checker = 0;
+    public int lastClickedRow = 16;
+
+    public int currentClickedColumn;
+    public int currentClickedRow;
+
+    private final byte spacing = 2;
+    private final byte boxWidth = 72;
+    private final byte boxHeight = 65;
 
     public int mX = -100;
     public int mY = -100;
@@ -23,14 +33,11 @@ public class GUI extends JFrame {
     public boolean isGameOver = false;
     public boolean defeat = false;
 
-    Font questionMarkBox = new Font("Tacoma", Font.BOLD, 30);
     Random random = new Random();
-    Component component = new Board();
     Timer timer = new Timer();
     ResetButtonSmiley smiley = new ResetButtonSmiley(isSmileyHappy);
 
     int[][] mines = new int[8][8];
-    int[][] neighbours = new int[8][8];
     boolean[][] revealed = new boolean[8][8];
     boolean[][] flagged = new boolean[8][8];
 
@@ -196,12 +203,12 @@ public class GUI extends JFrame {
     /**
      * Method that draws a question mark in clicked bo z
      */
-    private void drawQuestionMarkInBox(int column, int row, Graphics g) {
+    private void drawQuestionMarkInChosenBox(int column, int row, Graphics g) {
 
         if (revealed[column][row]) {
 
             g.setColor(Color.BLACK);
-            g.setFont(questionMarkBox);
+            g.setFont(new Font("Tacoma", Font.BOLD, 30));
             g.drawString("?", column * boxWidth + 25, row * boxHeight + boxHeight + 42);
         }
     }
@@ -255,14 +262,13 @@ public class GUI extends JFrame {
      */
     private void boxColorPicker(int column, int row, Graphics g) {
 
-        g.setColor(Color.GRAY);
-
         if (mines[column][row] == 1) {
 
             g.setColor(Color.BLUE);
+
         } else if (revealed[column][row]) {
 
-            g.setColor(Color.ORANGE);
+            doubleClickLogicForBox(g);
 
         } else if (mines[column][row] == 2) {
 
@@ -275,6 +281,39 @@ public class GUI extends JFrame {
         } else {
 
             g.setColor(Color.PINK);
+        }
+    }
+
+    //TODO make double click logic methods smaller
+    private void doubleClickLogicForBox(Graphics g) {
+
+        if(currentClickedColumn == lastClickedColumn && currentClickedRow == lastClickedRow) {
+
+            if (revealed[currentClickedColumn][currentClickedRow]) {
+
+                revealed[currentClickedColumn][currentClickedRow] = false;
+
+                int num = random.nextInt(10);
+
+                if (num <= 1) {
+
+                    mines[currentClickedColumn][currentClickedRow] = 1;
+
+                    System.out.printf("The rolled number is [%d], so the box is BLUE\n\n", num);
+
+                } else {
+
+                    mines[currentClickedColumn][currentClickedRow] = 4;
+
+                    System.out.printf("The rolled number is [%d], so the box is YELLOW\n\n", num);
+                }
+            }
+        }
+        else {
+
+            revealed[lastClickedColumn][lastClickedRow] = false;
+
+            g.setColor(Color.ORANGE);
         }
     }
 
@@ -292,10 +331,10 @@ public class GUI extends JFrame {
 
             paintBoxes(g);
 
-            //Draw smiley face as a Reset button
+            //Draws a smiley face as a Reset button
             smiley.drawResetButton(g);
 
-            //windowheader.Timer
+            //Shows a timer Timer
             timer.drawTimer(g);
 
         }
@@ -317,7 +356,7 @@ public class GUI extends JFrame {
 
                     g.fillRect(spacing + column * boxWidth, spacing + row * boxHeight + boxHeight, boxWidth - 2 * spacing, boxHeight - 2 * spacing);
 
-                    drawQuestionMarkInBox(column, row, g);
+                    drawQuestionMarkInChosenBox(column, row, g);
                 }
             }
         }
@@ -347,14 +386,25 @@ public class GUI extends JFrame {
 
             if (clickedBoxColumn() != -1 && clickedBoxRow() != -1) {
 
-                if (mines[clickedBoxColumn()][clickedBoxRow()] == 3) {
+                if (mines[clickedBoxColumn()][clickedBoxRow()] == 3 || mines[clickedBoxColumn()][clickedBoxRow()] == 2) {
+
+                    lastClickedColumn = currentClickedColumn;
+                    currentClickedColumn = clickedBoxColumn();
+
+                    lastClickedRow = currentClickedRow;
+                    currentClickedRow = clickedBoxRow();
 
                     revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+                    System.out.printf("Clicked Box coordinates -> Column:[%d] Row:[%d] Type:[%d]\n", clickedBoxColumn(), clickedBoxRow(), mines[currentClickedColumn][currentClickedRow]);
+                    System.out.printf("Last Clicked Column [%d] Row[%d]\n", lastClickedColumn, lastClickedRow);
 
                 }
-                System.out.printf("Clicked Box coordinates -> Column:[%d] Row:[%d]\n", clickedBoxColumn(), clickedBoxRow());
+            else if (mines[clickedBoxColumn()][clickedBoxRow()] == 1) {
 
-            } else {
+                    System.out.println("You clicked on a BLUE box");
+                }
+            }
+            else {
 
                 System.out.println("You did not click in any Box!");
             }
