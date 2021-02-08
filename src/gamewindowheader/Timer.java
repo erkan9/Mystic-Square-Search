@@ -9,9 +9,17 @@ public class Timer {
     private final int TIME_Y = 3;
 
     Font timerFont = new Font("Tacoma", Font.BOLD, 50);
-    Date date = new Date();
+    public Date date = new Date();
 
     public Timer() {}
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     /**
      * Method created to draw the timer

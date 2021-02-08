@@ -8,6 +8,14 @@ public class ResetButtonSmiley {
     private final byte RESET_BUTTON_Y = 1;
     private boolean isSmileyHappy = true;
 
+    public byte getRESET_BUTTON_Y() {
+        return RESET_BUTTON_Y;
+    }
+
+    public int getRESET_BUTTON_X() {
+        return RESET_BUTTON_X;
+    }
+
     public ResetButtonSmiley(boolean isSmileyHappy) {
 
         this.isSmileyHappy = isSmileyHappy;
@@ -38,6 +46,7 @@ public class ResetButtonSmiley {
         g.setColor(Color.BLACK);
         g.fillOval(this.RESET_BUTTON_X + 15, this.RESET_BUTTON_Y + 15, 10, 10);
         g.fillOval(this.RESET_BUTTON_X + 45, this.RESET_BUTTON_Y + 15, 10, 10);
+        g.fillOval(this.RESET_BUTTON_X + 32, this.RESET_BUTTON_Y + 30, 5, 5);
     }
 
     /**

@@ -8,38 +8,41 @@ import java.awt.event.MouseMotionListener;
 import java.util.*;
 import java.awt.*;
 
-//TODO make the logic about movement and end of game
+//TODO pick a green box for end of game
+//TODO visualise a window when game ends
 
 public class GUI extends JFrame {
 
     private final byte NUMBER_OF_COWS_AND_ROWS = 8;
-
-    boolean isBoxPlaced = false;
-    public int lastClickedColumn = 16;
-    int checker = 0;
-    public int lastClickedRow = 16;
-
-    public int currentClickedColumn;
-    public int currentClickedRow;
-
     private final byte spacing = 2;
     private final byte boxWidth = 72;
     private final byte boxHeight = 65;
 
-    public int mX = -100;
-    public int mY = -100;
+    private int lastClickedColumn;
+    private int lastClickedRow;
+
+    private int currentClickedColumn;
+    private int currentClickedRow;
+
+    private int mX = -100;
+    private int mY = -100;
+
+    public boolean isGameOver = false;
+    public boolean victory = false;
+
+    public boolean defeat = false;
 
     boolean isSmileyHappy = true;
-    public boolean isGameOver = false;
-    public boolean defeat = false;
 
     Random random = new Random();
     Timer timer = new Timer();
     ResetButtonSmiley smiley = new ResetButtonSmiley(isSmileyHappy);
 
+    private final int SMILEY_X_CENTER = smiley.getRESET_BUTTON_X() + 40;
+    private final int SMILEY_Y_CENTER = smiley.getRESET_BUTTON_Y() + 35;
+
     int[][] mines = new int[8][8];
     boolean[][] revealed = new boolean[8][8];
-    boolean[][] flagged = new boolean[8][8];
 
     public GUI() {
 
@@ -61,6 +64,7 @@ public class GUI extends JFrame {
         Click click = new Click();
 
         this.addMouseListener(click);
+
     }
 
     /**
@@ -153,16 +157,13 @@ public class GUI extends JFrame {
 
                         blueBoxCounter++;
 
-                    } else if (randomNumber <= 25 && greenBoxCounter <= 8) {
+                    } else if (randomNumber <= 30 && greenBoxCounter <= 8) {
 
                         mines[column][row] = 2;
 
                         greenBoxCounter++;
 
-                    } else {
-
-                        mines[column][row] = 3;
-                    }
+                    } else { mines[column][row] = 3; }
 
                     revealed[column][row] = false;
                 }
@@ -284,36 +285,278 @@ public class GUI extends JFrame {
         }
     }
 
-    //TODO make double click logic methods smaller
+
+    /**
+     * Method that checks if player clicked on same box twice or clicked in difference box
+     *
+     * @param g Object of Graphics
+     */
     private void doubleClickLogicForBox(Graphics g) {
 
-        if(currentClickedColumn == lastClickedColumn && currentClickedRow == lastClickedRow) {
+        if (currentClickedColumn == lastClickedColumn && currentClickedRow == lastClickedRow) {
 
-            if (revealed[currentClickedColumn][currentClickedRow]) {
-
-                revealed[currentClickedColumn][currentClickedRow] = false;
-
-                int num = random.nextInt(10);
-
-                if (num <= 1) {
-
-                    mines[currentClickedColumn][currentClickedRow] = 1;
-
-                    System.out.printf("The rolled number is [%d], so the box is BLUE\n\n", num);
-
-                } else {
-
-                    mines[currentClickedColumn][currentClickedRow] = 4;
-
-                    System.out.printf("The rolled number is [%d], so the box is YELLOW\n\n", num);
-                }
-            }
-        }
-        else {
+            isClickedInDifferentBox(g);
+        } else {
 
             revealed[lastClickedColumn][lastClickedRow] = false;
 
             g.setColor(Color.ORANGE);
+        }
+    }
+
+    /**
+     * Method calls color method for double clicked box and changes its "revealed" status
+     *
+     * @param g Object of Graphics
+     */
+    private void isClickedInDifferentBox(Graphics g) {
+
+        if (revealed[currentClickedColumn][currentClickedRow]) {
+
+            revealed[currentClickedColumn][currentClickedRow] = false;
+
+            colorChooserForDoubleClickedBox();
+        }
+    }
+
+    /**
+     * Method that randomises a number to pick a color for the double clicked box
+     */
+    private void colorChooserForDoubleClickedBox() {
+
+        int num = random.nextInt(10);
+
+        if (num <= 1) {
+
+            mines[currentClickedColumn][currentClickedRow] = 1;
+
+            System.out.printf("The rolled number is [%d], so the box is BLUE\n\n", num);
+
+        } else {
+
+            mines[currentClickedColumn][currentClickedRow] = 4;
+
+            System.out.printf("The rolled number is [%d], so the box is YELLOW\n\n", num);
+        }
+    }
+
+    /**
+     * Method that resets the board if player clicked Smiley's nose
+     */
+    private void isClickedInsideSmileyTrue() {
+
+        if (calculateIfClickedInsideSmiley()) {
+
+            System.out.println("You clicked inside the smiley, so the board is Reset");
+            resetBoardWhenClickSmileyFace();
+        }
+    }
+
+    // Methods created to check if our mouse clicked inside a box
+    // If click is in side a box, they will return X and Y value of the clicked box
+
+    /**
+     * Method that checks if player has clicked inside Smiley
+     *
+     * @return The difference between clicked and Smiley's location
+     */
+    private boolean calculateIfClickedInsideSmiley() {
+
+        int clickedCoordinatesDifference = clickedCoordinatesDifference = (int) Math.sqrt(Math.abs(mX - SMILEY_X_CENTER) * Math.sqrt(Math.abs(mX - SMILEY_X_CENTER) +
+                Math.sqrt(Math.abs(mY - SMILEY_Y_CENTER) * Math.sqrt(Math.abs(mY - SMILEY_Y_CENTER)))));
+
+        return clickedCoordinatesDifference < 6;
+    }
+
+    /**
+     * Method that resets the board and time when player clicks around Smiley's mouse
+     */
+    private void resetBoardWhenClickSmileyFace() {
+
+        isSmileyHappy = true;
+        isGameOver = false;
+        defeat = false;
+
+        timer.setDate(new Date());
+
+        blueGreenRedBoxGenerator(random);
+        makeSureYellowBoxIsPlaced(random, mines);
+    }
+
+    /**
+     * Method that checks if the player clicked inside a box
+     */
+    private void checkIfClickedInBox() {
+
+        if (clickedBoxColumn() != -1 && clickedBoxRow() != -1) {
+
+            setCurrentAndLastCoordinates();
+
+            int checkColumn = currentClickedColumn;
+            int checkRow = currentClickedRow;
+
+            checkIfClickedBoxGreenOrRed(checkColumn, checkRow);
+        } else {
+
+            System.out.println("You did not click in a box");
+        }
+    }
+
+    /**
+     * Method that checks if the clicked box is red or green
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void checkIfClickedBoxGreenOrRed(int checkColumn, int checkRow) {
+
+        if (mines[currentClickedColumn][currentClickedRow] == 3 || mines[currentClickedColumn][currentClickedRow] == 2) {
+
+            analyzerAndYellowBoxFinder(checkColumn, checkRow);
+
+            System.out.printf("Clicked Box coordinates -> Column:[%d] Row:[%d] Type:[%d] | ", clickedBoxColumn(), clickedBoxRow(), mines[currentClickedColumn][currentClickedRow]);
+            System.out.printf("Last Clicked Column [%d] Row[%d]\n", lastClickedColumn, lastClickedRow);
+        }
+    }
+
+    /**
+     * Method that sets the last ant current clicked coordinates
+     */
+    private void setCurrentAndLastCoordinates() {
+
+        lastClickedColumn = currentClickedColumn;
+        currentClickedColumn = clickedBoxColumn();
+
+        lastClickedRow = currentClickedRow;
+        currentClickedRow = clickedBoxRow();
+    }
+
+    /**
+     * Method that analyses where is the clicked box and analyses how to find the yellow box around
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void analyzerAndYellowBoxFinder(int checkColumn, int checkRow) {
+
+        if (currentClickedColumn >= 1 && currentClickedColumn <= 6) {
+
+            findYellowBoxWithColumn(checkColumn, checkRow);
+
+        }
+        if (currentClickedRow >= 1 && currentClickedRow <= 6) {
+
+            findYellowBoxWithRow(checkColumn, checkRow);
+
+        }
+        if (currentClickedColumn == 0) {
+
+            checkIfClickedColumnIsFirstColumn(checkColumn, checkRow);
+
+        }
+        if (currentClickedColumn == 7) {
+
+            checkIfClickedColumnIsLastColumn(checkColumn, checkRow);
+
+        }
+        if (currentClickedRow == 0) {
+
+            checkIfClickedRowIsFirstRow(checkColumn, checkRow);
+
+        }
+        if (currentClickedRow == 7) {
+
+            checkIfClickedRowIsLastRow(checkColumn, checkRow);
+        }
+    }
+
+    /**
+     * Method that checks if the there is a yellow box by Row
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void checkIfClickedRowIsLastRow(int checkColumn, int checkRow) {
+
+        if (mines[checkColumn][--checkRow] == 4 || mines[++checkColumn][checkRow] == 4 || mines[--checkColumn][checkRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+        }
+    }
+
+    /**
+     * Method that checks if the there is a yellow box by Row
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void checkIfClickedRowIsFirstRow(int checkColumn, int checkRow) {
+
+        if (mines[checkColumn][++checkRow] == 4 || mines[++checkColumn][checkRow] == 4 || mines[--checkColumn][checkRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+        }
+    }
+
+    /**
+     * Method that checks if the there is a yellow box by column
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void checkIfClickedColumnIsLastColumn(int checkColumn, int checkRow) {
+
+        if (mines[checkColumn][++checkRow] == 4 || mines[--checkColumn][checkRow] == 4 || mines[checkColumn][--checkRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+        }
+    }
+
+    /**
+     * Method that checks if the there is a yellow box by column
+     *
+     * @param checkColumn Int to check a yellow box's column
+     * @param checkRow    Int to check a yellow box's row
+     */
+    private void checkIfClickedColumnIsFirstColumn(int checkColumn, int checkRow) {
+
+        if (mines[checkColumn][checkRow] == 4 || mines[++checkColumn][checkRow] == 4 || mines[checkColumn][--checkRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+        }
+    }
+
+    /**
+     * Method that searches the yellow box around the clicked location
+     *
+     * @param checkColumn Int created for checking
+     * @param checkRow    Int created for checking
+     */
+    private void findYellowBoxWithColumn(int checkColumn, int checkRow) {
+
+        int previousColumn = checkColumn;
+        int nextColumn = checkColumn;
+
+        if (mines[--previousColumn][checkRow] == 4 || mines[++nextColumn][checkRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
+        }
+    }
+
+    /**
+     * Method that searches the yellow box around the clicked location
+     *
+     * @param checkColumn Int created for checking
+     * @param checkRow    Int created for checking
+     */
+    private void findYellowBoxWithRow(int checkColumn, int checkRow) {
+
+        int previousRow = checkRow;
+        int nextRow = checkRow;
+
+        if (mines[checkColumn][--previousRow] == 4 || mines[checkColumn][++nextRow] == 4) {
+
+            revealed[clickedBoxColumn()][clickedBoxRow()] = true;
         }
     }
 
@@ -362,9 +605,6 @@ public class GUI extends JFrame {
         }
     }
 
-    // Methods created to check if our mouse clicked inside a box
-    // If click is in side a box, they will return X and Y value of the clicked box
-
     public class Move implements MouseMotionListener {
 
         @Override
@@ -384,30 +624,9 @@ public class GUI extends JFrame {
 
         public void mouseClicked(MouseEvent e) {
 
-            if (clickedBoxColumn() != -1 && clickedBoxRow() != -1) {
+            checkIfClickedInBox();
 
-                if (mines[clickedBoxColumn()][clickedBoxRow()] == 3 || mines[clickedBoxColumn()][clickedBoxRow()] == 2) {
-
-                    lastClickedColumn = currentClickedColumn;
-                    currentClickedColumn = clickedBoxColumn();
-
-                    lastClickedRow = currentClickedRow;
-                    currentClickedRow = clickedBoxRow();
-
-                    revealed[clickedBoxColumn()][clickedBoxRow()] = true;
-                    System.out.printf("Clicked Box coordinates -> Column:[%d] Row:[%d] Type:[%d]\n", clickedBoxColumn(), clickedBoxRow(), mines[currentClickedColumn][currentClickedRow]);
-                    System.out.printf("Last Clicked Column [%d] Row[%d]\n", lastClickedColumn, lastClickedRow);
-
-                }
-            else if (mines[clickedBoxColumn()][clickedBoxRow()] == 1) {
-
-                    System.out.println("You clicked on a BLUE box");
-                }
-            }
-            else {
-
-                System.out.println("You did not click in any Box!");
-            }
+            isClickedInsideSmileyTrue();
         }
 
         @Override
@@ -418,13 +637,6 @@ public class GUI extends JFrame {
         @Override
         public void mouseReleased(MouseEvent e) {
 
-        }
-
-        public void resetBoardWhenClickSmileyFace() {
-
-            isSmileyHappy = true;
-            isGameOver = false;
-            defeat = false;
         }
 
         @Override
