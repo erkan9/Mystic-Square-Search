@@ -8,6 +8,10 @@ public class ResetButtonSmiley {
     private final byte RESET_BUTTON_Y = 1;
     private boolean isSmileyHappy = true;
 
+    public ResetButtonSmiley() {
+
+    }
+
     public byte getRESET_BUTTON_Y() {
         return RESET_BUTTON_Y;
     }
@@ -16,9 +20,8 @@ public class ResetButtonSmiley {
         return RESET_BUTTON_X;
     }
 
-    public ResetButtonSmiley(boolean isSmileyHappy) {
-
-        this.isSmileyHappy = isSmileyHappy;
+    public void setSmileyHappy(boolean smileyHappy) {
+        isSmileyHappy = smileyHappy;
     }
 
     /**

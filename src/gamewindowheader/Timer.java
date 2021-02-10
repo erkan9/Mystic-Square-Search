@@ -11,7 +11,7 @@ public class Timer {
     Font timerFont = new Font("Tacoma", Font.BOLD, 50);
     public Date date = new Date();
 
-    public Timer() {}
+    public Timer() { }
 
     public Date getDate() {
         return date;
@@ -31,8 +31,9 @@ public class Timer {
         timerAppearance(g);
 
         timerSecondsVisualiser(g);
-    }
 
+        //stopGameWhenWin(g);
+    }
 
     /**
      * Method that sets appearance of the counter box
@@ -42,10 +43,10 @@ public class Timer {
     private void timerAppearance(Graphics g) {
 
         g.setColor(Color.ORANGE);
-        g.fillRect(TIME_X, TIME_Y, 124, 60);
+        g.fillRect(this.TIME_X, this.TIME_Y, 124, 60);
 
         g.setColor(Color.BLACK);
-        g.setFont(timerFont);
+        g.setFont(this.timerFont);
     }
 
     /**
@@ -55,19 +56,19 @@ public class Timer {
      */
     private void timerSecondsVisualiser(Graphics g) {
 
-        int secondsSpentInGame = (int) ((new Date().getTime() - date.getTime()) / 1000);
+        int secondsSpentInGame = secondsSpentInGame = (int) ((new Date().getTime() - date.getTime()) / 1000);
 
         if (secondsSpentInGame < 10) {
 
-            g.drawString("00" + secondsSpentInGame, TIME_X + 20, TIME_Y + 50);
+            g.drawString("00" + secondsSpentInGame, this.TIME_X + 20, this.TIME_Y + 50);
 
         } else if (secondsSpentInGame < 100) {
 
-            g.drawString("0" + secondsSpentInGame, TIME_X + 20, TIME_Y + 50);
+            g.drawString("0" + secondsSpentInGame, this.TIME_X + 20, this.TIME_Y + 50);
 
         } else {
 
-            g.drawString(Integer.toString(secondsSpentInGame), TIME_X, TIME_Y + 50);
+            g.drawString(Integer.toString(secondsSpentInGame), this.TIME_X, this.TIME_Y + 50);
         }
     }
 }
