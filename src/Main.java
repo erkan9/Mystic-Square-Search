@@ -1,23 +1,28 @@
-import javax.swing.*;
+import game.GUI;
+import musicplayer.AudioPlay;
 
-import java.awt.*;
+import javax.swing.*;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
 public class Main implements Runnable {
 
     GUI gui = new GUI();
+    private boolean endGame = false;
 
     public static void main(String[] args) {
 
         new Thread(new Main()).start();
+        String audioFilePath = "D:/GPS/music/GPS.wav";
+        AudioPlay player = new AudioPlay();
+        player.play(audioFilePath);
 
     }
 
     @Override
     public void run() {
 
-        while (true) {
+        while (!endGame) {
 
             this.gui.repaint();
 
@@ -25,6 +30,7 @@ public class Main implements Runnable {
 
             showMessageWhenGameOver();
         }
+        System.exit(0);
     }
 
     /**
@@ -36,17 +42,19 @@ public class Main implements Runnable {
 
             String[] options = {"Reset Game", "Exit Game"};
 
-            int x = JOptionPane.showOptionDialog(null, "You won the Game!!!\n" +
+            int message = JOptionPane.showOptionDialog(null, "You won the Game!!!\n" +
                             "Smiley is sad because the Game is over\n",
                     "Reset or Exit the game",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-            if (x == JOptionPane.YES_OPTION) {
+            if (message == JOptionPane.YES_OPTION) {
 
                 this.gui.resetBoardWhenClickSmileyFace();
-            } else if (x == JOptionPane.NO_OPTION) {
 
-                System.exit(0);
+            } else if (message == JOptionPane.NO_OPTION) {
+
+                this.endGame = true;
+
             }
         }
     }
