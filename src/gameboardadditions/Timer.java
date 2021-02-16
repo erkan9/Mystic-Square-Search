@@ -13,10 +13,6 @@ public class Timer {
 
     public Timer() { }
 
-    public Date getDate() {
-        return date;
-    }
-
     public void setDate(Date date) {
         this.date = date;
     }
@@ -56,7 +52,7 @@ public class Timer {
      */
     private void timerSecondsVisualiser(Graphics g) {
 
-        int secondsSpentInGame = secondsSpentInGame = (int) ((new Date().getTime() - date.getTime()) / 1000);
+        int secondsSpentInGame = (int) ((new Date().getTime() - date.getTime()) / 1000);
 
         if (secondsSpentInGame < 10) {
 

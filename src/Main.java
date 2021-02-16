@@ -3,8 +3,6 @@ import musicplayer.AudioPlay;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.showMessageDialog;
-
 public class Main implements Runnable {
 
     GUI gui = new GUI();
@@ -13,7 +11,7 @@ public class Main implements Runnable {
     public static void main(String[] args) {
 
         new Thread(new Main()).start();
-        String audioFilePath = "D:/GPS/music/GPS.wav";
+        String audioFilePath = "D:/GPS-Game/music/music.wav";
         AudioPlay player = new AudioPlay();
         player.play(audioFilePath);
 
@@ -22,7 +20,7 @@ public class Main implements Runnable {
     @Override
     public void run() {
 
-        while (!endGame) {
+        while (!this.endGame) {
 
             this.gui.repaint();
 

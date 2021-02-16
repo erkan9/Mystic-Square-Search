@@ -39,10 +39,8 @@ public class AudioPlay {
 
             audioLine.start();
 
-            System.out.println("Now Playing -> DESSITA & LIDIA ft. TEDI ALEKSANDROVA - GPS-A");
-
             byte[] bytesBuffer = new byte[BUFFER_SIZE];
-            int bytesRead = -1;
+            int bytesRead;
 
             while ((bytesRead = audioStream.read(bytesBuffer)) != -1) { audioLine.write(bytesBuffer, 0, bytesRead); }
 
